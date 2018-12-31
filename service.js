@@ -1,9 +1,14 @@
+// Copyright (c) 2018, Brandon Lehmann, The TurtleCoin Developers
+//
+// Please see the included LICENSE file for more information.
+
 'use strict'
 
 const TurtleCoind = require('./')
 const util = require('util')
 
 var daemon = new TurtleCoind({
+  loadCheckpoints: './checkpoints.csv'
   // Load additional daemon parameters here
 })
 
@@ -20,7 +25,7 @@ daemon.on('started', () => {
 })
 
 daemon.on('syncing', (info) => {
-  log(util.format('TurtleCoind has syncronized %s out of %s blocks [%s%]', info.height, info.network_height, info.percent))
+  log(util.format('TurtleCoind has synchronized %s out of %s blocks [%s%]', info.height, info.network_height, info.percent))
 })
 
 daemon.on('synced', () => {

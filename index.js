@@ -33,7 +33,7 @@ const TurtleCoind = function (opts) {
     used if you don't specify them when you create the object.
   */
   this.pollingInterval = opts.pollingInterval || 10000
-  this.maxPollingFailures = opts.maxPollingFailures || 3
+  this.maxPollingFailures = opts.maxPollingFailures || 6
   this.checkHeight = opts.checkHeight || true
   this.maxDeviance = opts.maxDeviance || 5
   this.clearP2pOnStart = opts.clearP2pOnStart || true
@@ -43,8 +43,10 @@ const TurtleCoind = function (opts) {
   this.webSocketPassword = opts.webSocketPassword || false
 
   // Begin TurtleCoind options
-  this.path = opts.path || path.resolve(__dirname, './TurtleCoind')
+  this.path = opts.path || path.resolve(__dirname, './TurtleCoind' + ((os.platform() === 'win32') ? '.exe' : ''))
   this.dataDir = opts.dataDir || path.resolve(os.homedir(), './.TurtleCoin')
+  this.logFile = opts.logFile || path.resolve(__dirname, './TurtleCoind.log')
+  this.logLevel = opts.logLevel || 2
   this.testnet = opts.testnet || false
   this.enableCors = opts.enableCors || false
   this.enableBlockExplorer = opts.enableBlockExplorer || true
@@ -308,10 +310,9 @@ TurtleCoind.prototype._checkRpc = function () {
   return new Promise((resolve, reject) => {
     Promise.all([
       this.api.getInfo(),
-      this.api.getHeight(),
-      this.api.getTransactions()
+      this.api.getHeight()
     ]).then((results) => {
-      if (results[0].height === results[1].height && results[0].status === results[1].status && results[1].status === results[2].status) {
+      if (results[0].height === results[1].height && results[0].status === results[1].status) {
         return resolve(results)
       } else {
         return reject(new Error('Daemon is returning inconsistent results'))
@@ -340,9 +341,11 @@ TurtleCoind.prototype._write = function (data) {
 TurtleCoind.prototype._buildargs = function () {
   var args = ''
   if (this.dataDir) args = util.format('%s --data-dir %s', args, this.dataDir)
+  if (this.logFile) args = util.format('%s --log-file %s', args, this.logFile)
+  if (this.logLevel) args = util.format('%s --log-level %s', args, this.logLevel)
   if (this.testnet) args = util.format('%s --testnet', args)
   if (this.enableCors) args = util.format('%s --enable-cors %s', args, this.enableCors)
-  if (this.enableBlockExplorer) args = util.format('%s --enable_blockexplorer', args)
+  if (this.enableBlockExplorer) args = util.format('%s --enable-blockexplorer', args)
   if (this.loadCheckpoints) {
     if (fs.existsSync(path.resolve(this.loadCheckpoints))) {
       args = util.format('%s --load-checkpoints %s', args, path.resolve(this.loadCheckpoints))

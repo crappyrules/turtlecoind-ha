@@ -1,3 +1,7 @@
+[![NPM](https://nodei.co/npm/turtlecoind-ha.png?downloads=true&stars=true)](https://nodei.co/npm/turtlecoind-ha/)
+
+[![Build Status](https://travis-ci.org/brandonlehmann/turtlecoind-ha.png?branch=master)](https://travis-ci.org/brandonlehmann/turtlecoind-ha) [![Build Status](https://ci.appveyor.com/api/projects/status/github/brandonlehmann/turtlecoind-ha?branch=master&svg=true)](https://ci.appveyor.com/project/brandonlehmann/turtlecoind-ha/branch/master)
+
 # TurtleCoind High-Availability Daemon Wrapper
 
 This project is designed to wrap the TurtleCoind daemon on a *nix system and monitor it for hangups, locks, fork, or other events that cause the daemon to stop responding to requests in an accurate manner.
@@ -23,17 +27,17 @@ N/A
 ## Dependencies
 
 * [NodeJS v8.x](https://nodejs.org/)
-* [TurtleCoind](https://github.com/turtlecoin/turtlecoin/releases) v0.5.0 or higher
+* [TurtleCoind](https://github.com/turtlecoin/turtlecoin/releases) v0.8.4 or higher
 
 ## Easy Start
 
 You *must* copy ```TurtleCoind``` into the ```turtlecoind-ha``` folder for the easy start process to occur.
 
 ```bash
-git clone https://github.com/brandonlehmann/turtlecoind-ha.git
+git clone https://github.com/turtlecoin/turtlecoind-ha.git
 cd turtlecoind-ha
 cp <TurtleCoind> .
-npm i & node service.js
+sudo npm install & node service.js
 ```
 
 **It is highly recommended that you use [checkpoints](https://github.com/turtlecoin/turtlecoin/wiki/Using-checkpoints) when starting fresh or you'll need to wait a while for the sync to occur.**
@@ -70,7 +74,7 @@ var daemon = new TurtleCoind({
   timeout: 2000, // How long to wait for RPC responses in milliseconds
   enableWebSocket: true, // Enables a socket.io websocket server on the rpcBindPort + 1
   webSocketPassword: false, // Set this to a password to use for the privileged socket events.
-  
+
   // These are the standard TurtleCoind options
   path: './TurtleCoind', // Where can I find TurtleCoind?
   dataDir: '~/.TurtleCoin', // Where do you store your blockchain?
@@ -758,7 +762,7 @@ Gets a block hash by height.
 7fb97df81221dd1366051b2d0bc7f49c66c22ac4431d879c895b06d66ef66f4c
 ```
 
-### daemon.api.getHeight()
+### daemon.api.height()
 
 #### Sample Data
 
@@ -770,27 +774,39 @@ Gets a block hash by height.
 }
 ```
 
-### daemon.api.getInfo()
+### daemon.api.info()
 
 #### Sample Data
 
 ```javascript
 {
-"alt_blocks_count": 14,
-"difficulty": 289121015,
-"grey_peerlist_size": 4997,
-"hashrate": 9637367,
-"height": 502354,
-"incoming_connections_count": 12,
-"last_known_block_index": 502352,
-"network_height": 502354,
-"outgoing_connections_count": 8,
-"status": "OK",
-"synced": true,
-"tx_count": 473486,
-"tx_pool_size": 1,
-"version": "0.5.0",
-"white_peerlist_size": 1000
+  "alt_blocks_count": 14,
+  "difficulty": 289121015,
+  "grey_peerlist_size": 4997,
+  "hashrate": 9637367,
+  "height": 502354,
+  "incoming_connections_count": 12,
+  "last_known_block_index": 502352,
+  "network_height": 502354,
+  "outgoing_connections_count": 8,
+  "status": "OK",
+  "synced": true,
+  "tx_count": 473486,
+  "tx_pool_size": 1,
+  "version": "0.5.0",
+  "white_peerlist_size": 1000
+}
+```
+
+### daemon.api.fee()
+
+#### Sample Data
+
+```javascript
+{
+  "address": "TRTLv27NRnfaGLvxDuE1SfQt2zbvfEiTNJtFcBNZwUAAQYL1oxejK1c8PaCTCa61he99a31So9KNaQ4kGkKjjstwhyM2FqdwUyU",
+  "amount": 5000,
+  "status": "OK"
 }
 ```
 
@@ -806,7 +822,7 @@ Gets a block hash by height.
 }
 ```
 
-### daemon.api.getPeers()
+### daemon.api.peers()
 
 #### Sample Data
 
@@ -833,7 +849,7 @@ A WebSocket [socket.io](https://socket.io/) server is initialized if ```enableWe
 
 Some events require that the socket is authenticated via a ```auth``` event.
 
-If the **nonce** column is *Yes* you may send a *nonce* in the payload in addition to the options defined. 
+If the **nonce** column is *Yes* you may send a *nonce* in the payload in addition to the options defined.
 
 ### Client Initiated Events
 
@@ -852,10 +868,11 @@ If the **nonce** column is *Yes* you may send a *nonce* in the payload in additi
 |getBlockHeaderByHash|Yes|Yes|See [daemon.api.getBlockHeaderByHash(options)](#daemonapigetblockheaderbyhashoptions)|
 |getBlockHeaderByHeight|Yes|Yes|See [daemon.api.getBlockHeaderByHeight(options)](#daemonapigetblockheaderbyheightoptions)|
 |getCurrencyId|Yes|Yes|See [daemon.api.getCurrencyId()](#daemonapigetcurrencyid)|
-|getHeight|Yes|Yes|See [daemon.api.getHeight()](#daemonapigetheight)|
-|getInfo|Yes|Yes|See [daemon.api.getInfo()](#daemonapigetinfo)|
+|height|Yes|Yes|See [daemon.api.getHeight()](#daemonapiheight)|
+|info|Yes|Yes|See [daemon.api.getInfo()](#daemonapiinfo)|
+|fee|Yes|Yes|See [daemon.api.fee()](#daemonapifee)|
 |getTransactions|Yes|Yes|See [daemon.api.getTransactions()](#daemonapigettransactions)|
-|getPeers|Yes|Yes|See [daemon.api.getPeers()](#daemonapigetpeers)|
+|peers|Yes|Yes|See [daemon.api.getPeers()](#daemonapipeers)|
 |sendRawTransaction|Yes|Yes|See [daemon.api.sendRawTransaction()](#daemonapisendrawtransaction)|
 
 
@@ -903,19 +920,15 @@ All responses except for ***auth*** return data in the same format.
 |getBlockHeaderByHash|Yes|See [daemon.api.getBlockHeaderByHash(options)](#daemonapigetblockheaderbyhashoptions)|
 |getBlockHeaderByHeight|Yes|See [daemon.api.getBlockHeaderByHeight(options)](#daemonapigetblockheaderbyheightoptions)|
 |getCurrencyId|Yes|See [daemon.api.getCurrencyId()](#daemonapigetcurrencyid)|
-|getHeight|Yes|See [daemon.api.getHeight()](#daemonapigetheight)|
-|getInfo|Yes|See [daemon.api.getInfo()](#daemonapigetinfo)|
+|height|Yes|See [daemon.api.height()](#daemonapigetheight)|
+|info|Yes|See [daemon.api.info()](#daemonapigetinfo)|
+|fee|Yes|See [daemon.api.fee()](#daemonapifee)|
 |getTransactions|Yes|See [daemon.api.getTransactions()](#daemonapigettransactions)|
-|getPeers|Yes|See [daemon.api.getPeers()](#daemonapigetpeers)|
+|peers|Yes|See [daemon.api.peers()](#daemonapigetpeers)|
 |sendRawTransaction|Yes|See [daemon.api.sendRawTransaction()](#daemonapisendrawtransaction)|
-
 
 ## License
 
-Copyright (C) 2018 Brandon Lehmann, The TurtleCoin Developers
+Copyright (c) 2018, Brandon Lehmann, The TurtleCoin Developers
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+Please see the included LICENSE file for more information.
